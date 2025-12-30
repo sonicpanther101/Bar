@@ -34,6 +34,8 @@
           
           buildInputs = with pkgs; [
             libGL
+            libglvnd
+            glew
             libGLU
             glm
             # X11 libraries
@@ -66,8 +68,10 @@
             cmake
             clang-tools
             pkg-config
-            wayland-scanner  # Add here too
+            wayland-scanner
             libGL
+            libglvnd
+            glew
             libGLU
             glm
             # X11 libraries
@@ -81,6 +85,27 @@
             wayland-protocols
             libxkbcommon
           ];
+
+          # Try commenting this out to see if native Wayland works now
+          # export GLFW_PLATFORM=x11 
+
+          shellHook = ''
+            export LD_LIBRARY_PATH="${pkgs.lib.makeLibraryPath [ 
+              pkgs.wayland 
+              pkgs.libxkbcommon 
+              pkgs.libGL 
+              pkgs.libglvnd
+              pkgs.xorg.libX11 
+              pkgs.xorg.libXcursor
+              pkgs.xorg.libXi
+              pkgs.xorg.libXinerama
+              pkgs.xorg.libXrandr
+            ]}:/run/opengl-driver/lib:/run/opengl-driver-32/lib"
+            
+            export XDG_RUNTIME_DIR=/run/user/$(id -u)
+            export WAYLAND_DISPLAY=''${WAYLAND_DISPLAY:-wayland-1}
+            export DISPLAY=''${DISPLAY:-:0}
+          '';
         };
       }
     );
