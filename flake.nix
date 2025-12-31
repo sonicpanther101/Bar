@@ -26,10 +26,11 @@
           
           src = ./.;
           
-          nativeBuildInputs = [ 
-            pkgs.cmake 
-            pkgs.pkg-config
-            pkgs.wayland-scanner  # Build-time tool for generating Wayland protocol code
+          nativeBuildInputs = with pkgs; [ 
+            cmake 
+            pkg-config
+            wayland-scanner  # Build-time tool for generating Wayland protocol code
+            libffi
           ];
           
           buildInputs = with pkgs; [
@@ -46,8 +47,11 @@
             xorg.libXi
             # Wayland libraries
             wayland
+            wayland-utils  # debugging
             wayland-protocols
             libxkbcommon
+            mesa                                # EGL + OpenGL ES
+            egl-wayland                         # wl_egl_window_create()
           ];
           
           preConfigure = ''
@@ -69,6 +73,7 @@
             clang-tools
             pkg-config
             wayland-scanner
+            libffi
             libGL
             libglvnd
             glew
@@ -82,8 +87,11 @@
             xorg.libXi
             # Wayland libraries
             wayland
+            wayland-utils  # debugging
             wayland-protocols
             libxkbcommon
+            mesa                                # EGL + OpenGL ES
+            egl-wayland                         # wl_egl_window_create()
           ];
 
           # Try commenting this out to see if native Wayland works now
