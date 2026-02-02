@@ -4,57 +4,30 @@ project(Bar)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-set(PROTOCOL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/protocols")
-include_directories(${PROTOCOL_DIR})
-
 find_package(PkgConfig REQUIRED)
 
-# Pull in ALL standard Wayland protocols + core libs
-pkg_check_modules(WAYLAND REQUIRED 
-    wayland-client 
-    wayland-egl 
-    wayland-cursor 
-    xkbcommon
-    egl 
-    glesv2
-)
+# Only need basic OpenGL/GLFW dependencies for SableUI
+pkg_check_modules(GLFW3 REQUIRED glfw3)
 
+find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
-
-add_definitions(-DGLEW_EGL -DGLEW_NO_GLU)
 
 # Add SableUI subdirectory
 add_subdirectory(vendor/SableUI)
 
-file(GLOB SOURCE "*.cpp" "*.h")
-add_executable(Bar
-    ${SOURCE}
-    ${PROTOCOL_DIR}/wlr-layer-shell-unstable-v1-protocol.c
-    ${PROTOCOL_DIR}/xdg-shell-protocol.c
-)
+# Just your main.cpp
+add_executable(Bar main.cpp)
 
 target_include_directories(Bar PRIVATE
-    ${WAYLAND_INCLUDE_DIRS}
-    ${EGL_INCLUDE_DIRS}
-    ${GLES2_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/SableUI/include
+    ${GLFW3_INCLUDE_DIRS}
+    ${OPENGL_INCLUDE_DIR}
 )
 
-# Comprehensive linking - covers all protocol deps
+# Link against SableUI and its dependencies
 target_link_libraries(Bar PRIVATE
-    ${WAYLAND_LIBRARIES}
-    wayland-client
-    wayland-egl
-    wayland-cursor
-    xkbcommon
-    EGL
-    GLESv2
+    SableUI
+    ${GLFW3_LIBRARIES}
+    ${OPENGL_LIBRARIES}
     GLEW::GLEW
-    SableUI  # Link against SableUI library
-)
-
-# Force link order and add any missing deps from pkg-config
-target_link_options(Bar PRIVATE 
-    ${WAYLAND_LDFLAGS}
-    -Wl,--no-as-needed  # NixOS linker quirk
 )

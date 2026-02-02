@@ -38,14 +38,16 @@ int main() {
 	// Register the component for use with strings (more flexible)
 	SableUI::RegisterComponent<Counter>("Counter");
 
-	SableUI::Initialise("SableUI", 400, 300);
+	// Initialize SableUI with window title and dimensions
+	SableUI::Initialise("SableUI Counter", 400, 300);
 
-	// Add component under main window
+	// Mount the Counter component to the root
 	Panel("Counter");
 
 	// Main loop with WaitEvents() (most efficient)
-	while (SableUI::WaitEvents())
+	while (SableUI::WaitEventsTimeout(1/10)) {
 		SableUI::Render();
+	}
 
 	SableUI::Shutdown();
 	return 0;

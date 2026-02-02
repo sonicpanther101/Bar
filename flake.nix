@@ -1,5 +1,5 @@
 {
-  description = "A simple C++ hello world";
+  description = "Bar - Wayland bar using SableUI";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -10,91 +10,42 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-        
-        # Use fetchgit with proper branch reference
-        sableUI = pkgs.fetchgit {
-          url = "https://github.com/oliwilliams1/SableUI";
-          # Get the latest commit - you'll need to update the hash
-          # Run: nix-prefetch-git https://github.com/oliwilliams1/SableUI
-          rev = "refs/heads/master";
-          # This is a placeholder - nix will tell you the correct hash
-          hash = "sha256-LvMjI6jDxorQi12k6NWsSIyABuUsJxRBibUcLJYPXMA=";
-          fetchSubmodules = true;
-        };
       in
       {
-        packages.default = pkgs.stdenv.mkDerivation {
-          pname = "Bar";
-          version = "0.1.0";
-          
-          src = ./.;
-          
-          nativeBuildInputs = with pkgs; [ 
-            cmake 
-            pkg-config
-            wayland-scanner  # Build-time tool for generating Wayland protocol code
-            libffi
-          ];
-          
-          buildInputs = with pkgs; [
-            libGL
-            libglvnd
-            glew
-            libGLU
-            glm
-            # X11 libraries
-            xorg.libX11
-            xorg.libXrandr
-            xorg.libXinerama
-            xorg.libXcursor
-            xorg.libXi
-            # Wayland libraries
-            wayland
-            wayland-utils  # debugging
-            wayland-protocols
-            libxkbcommon
-            mesa                                # EGL + OpenGL ES
-            egl-wayland                         # wl_egl_window_create()
-          ];
-          
-          preConfigure = ''
-            mkdir -p vendor
-            cp -r ${sableUI} vendor/SableUI
-            chmod -R u+w vendor/SableUI
-          '';
-          
-          meta = with pkgs.lib; {
-            description = "A simple C++ hello world";
-            license = licenses.mit;
-          };
-        };
-
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; [
+            # Build tools
             gcc
             cmake
             clang-tools
             pkg-config
+            
+            # Wayland build-time tools
             wayland-scanner
             libffi
+            
+            # Graphics libraries
             libGL
             libglvnd
             glew
             libGLU
             glm
+            mesa
+            egl-wayland
+            glfw
+            
             # X11 libraries
             xorg.libX11
             xorg.libXrandr
             xorg.libXinerama
             xorg.libXcursor
             xorg.libXi
+            
             # Wayland libraries
             wayland
-            wayland-utils  # debugging
+            wayland-utils
             wayland-protocols
             libxkbcommon
-            mesa                                # EGL + OpenGL ES
-            egl-wayland                         # wl_egl_window_create()
           ];
 
           shellHook = ''
@@ -113,6 +64,9 @@
             export XDG_RUNTIME_DIR=/run/user/$(id -u)
             export WAYLAND_DISPLAY=''${WAYLAND_DISPLAY:-wayland-1}
             export DISPLAY=''${DISPLAY:-:0}
+            
+            echo "Bar development environment loaded"
+            echo "Build with: mkdir -p build && cd build && cmake .. && make -j\$(nproc)"
           '';
         };
       }
