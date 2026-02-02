@@ -11,11 +11,14 @@
       let
         pkgs = nixpkgs.legacyPackages.${system};
         
-        sableUI = pkgs.fetchFromGitHub {
-          owner = "oliwilliams1";
-          repo = "SableUI";
-          rev = "master";
-          hash = "";
+        # Use fetchgit with proper branch reference
+        sableUI = pkgs.fetchgit {
+          url = "https://github.com/oliwilliams1/SableUI";
+          # Get the latest commit - you'll need to update the hash
+          # Run: nix-prefetch-git https://github.com/oliwilliams1/SableUI
+          rev = "refs/heads/master";
+          # This is a placeholder - nix will tell you the correct hash
+          hash = "sha256-LvMjI6jDxorQi12k6NWsSIyABuUsJxRBibUcLJYPXMA=";
           fetchSubmodules = true;
         };
       in
@@ -93,9 +96,6 @@
             mesa                                # EGL + OpenGL ES
             egl-wayland                         # wl_egl_window_create()
           ];
-
-          # Try commenting this out to see if native Wayland works now
-          # export GLFW_PLATFORM=x11 
 
           shellHook = ''
             export LD_LIBRARY_PATH="${pkgs.lib.makeLibraryPath [ 

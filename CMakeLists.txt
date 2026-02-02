@@ -23,6 +23,9 @@ find_package(GLEW REQUIRED)
 
 add_definitions(-DGLEW_EGL -DGLEW_NO_GLU)
 
+# Add SableUI subdirectory
+add_subdirectory(vendor/SableUI)
+
 file(GLOB SOURCE "*.cpp" "*.h")
 add_executable(Bar
     ${SOURCE}
@@ -34,6 +37,7 @@ target_include_directories(Bar PRIVATE
     ${WAYLAND_INCLUDE_DIRS}
     ${EGL_INCLUDE_DIRS}
     ${GLES2_INCLUDE_DIRS}
+    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/SableUI/include
 )
 
 # Comprehensive linking - covers all protocol deps
@@ -46,6 +50,7 @@ target_link_libraries(Bar PRIVATE
     EGL
     GLESv2
     GLEW::GLEW
+    SableUI  # Link against SableUI library
 )
 
 # Force link order and add any missing deps from pkg-config
