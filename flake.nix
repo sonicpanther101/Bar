@@ -15,7 +15,7 @@
           owner = "oliwilliams1";
           repo = "SableUI";
           rev = "master";
-          hash = "sha256-/bBuDxAenF5dH1sKIBmoONy1Esrj7ZqnZShQgzg/3VY=";
+          hash = "";
           fetchSubmodules = true;
         };
       in
