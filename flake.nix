@@ -35,11 +35,11 @@
             glfw
             
             # X11 libraries
-            xorg.libX11
-            xorg.libXrandr
-            xorg.libXinerama
-            xorg.libXcursor
-            xorg.libXi
+            libX11
+            libXrandr
+            libXinerama
+            libXcursor
+            libXi
             
             # Wayland libraries
             wayland
@@ -54,11 +54,11 @@
               pkgs.libxkbcommon 
               pkgs.libGL 
               pkgs.libglvnd
-              pkgs.xorg.libX11 
-              pkgs.xorg.libXcursor
-              pkgs.xorg.libXi
-              pkgs.xorg.libXinerama
-              pkgs.xorg.libXrandr
+              pkgs.libX11 
+              pkgs.libXcursor
+              pkgs.libXi
+              pkgs.libXinerama
+              pkgs.libXrandr
             ]}:/run/opengl-driver/lib:/run/opengl-driver-32/lib"
             
             export XDG_RUNTIME_DIR=/run/user/$(id -u)
