@@ -15,10 +15,12 @@ find_package(GLEW REQUIRED)
 # Add SableUI subdirectory
 add_subdirectory(vendor/SableUI)
 
-# Just your main.cpp
-add_executable(Bar main.cpp)
+file(GLOB SOURCES "src/*.cpp" "src/*.h")
 
-target_include_directories(Bar PRIVATE
+# Just your main.cpp
+add_executable(${PROJECT_NAME} ${SOURCES})
+
+target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/SableUI/include
     ${GLFW3_INCLUDE_DIRS}
     ${OPENGL_INCLUDE_DIR}
