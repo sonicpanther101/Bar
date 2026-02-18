@@ -1,101 +1,49 @@
 #include <SableUI/SableUI.h>
 #include "utils.h"
+#include <iostream>
 
 using namespace SableUI;
 using namespace SableUI::Style;
 
-class WaybarClone : public BaseComponent
+class Bar : public BaseComponent
 {
 public:
     void Layout() override {
-        const Theme& t = GetTheme();
-        
-        // Main bar container - full width, positioned at top
-        Div(left_right, w_fill, h(30), bg(t.base), px(8), centerY) {
-            
-            // Left section - workspaces (simplified)
-            Div(w_fit, h_fill, centerY, mr(16)) {
-                for(int i = 1; i <= 5; i++) {
-                    Text(SableString::Format("%d", i), 
-                         fontSize(14), 
-                         textWrap(false),
-                         mx(4),
-                         textColour(i == activeWorkspace.get() ? t.text : t.subtext1));
-                }
+        if (frames < 2)
+            update.set(!update.get());
+        frames.set((frames.get()+1)%10000);
+
+        if (update) {
+            time.set(SableString(Utils::exec("date '+%a %d %b %-I:%M%p'")));
+        }
+
+        Div(left_right, w_fill, h_fill, bg(100,100,100)) {
+            Div(left_right, w_fill, h_fill, bg(200,200,0), mx(10)) {
+                Text(SableString::Format("count: %d", count.get()), fontSize(18), textWrap(false));
+                Button("Increment", [this]() { count.set(count.get() + 1); });
             }
-            
-            // Center section - clock
-            Div(w_fill, h_fill, centerXY) {
-                Text(clockText.get(), 
-                     fontSize(14), 
-                     textWrap(false),
-                     textColour(t.text));
+
+            Div(left_right, w_fill, h_fill, bg(200,200,0), mx(10)) {
+                Text(time.get(), fontSize(20), textWrap(false), justify_center, w_fill);
             }
-            
-            // Right section - various modules
-            Div(w_fit, h_fill, centerY, left_right) {
-                
-                // Volume
-                Text(SableString::Format("%d%% 🔊", volume.get()),
-                     fontSize(14),
-                     textWrap(false),
-                     mx(8),
-                     textColour(t.text));
-                
-                // Tray spacer
-                RectElement(w(10), h_fill);
-                
-                // Battery (if applicable)
-                Text(SableString::Format("🔋 %d%%", battery.get()),
-                     fontSize(14),
-                     textWrap(false),
-                     mx(8),
-                     textColour(battery.get() < 25 ? t.red : 
-                               battery.get() < 50 ? t.yellow : t.green));
+
+            Div(right_left, w_fill, h_fill, bg(200,200,0), mx(10)) {
+                Button("Decrement", [this]() { count.set(count.get() - 1); });
             }
         }
     }
 
-    void OnUpdate(const UIEventContext& ctx) override {
-        // Update clock every second
-        if(ctx.IsFired(clockTimer.GetHandle())) {
-            clockText.set(SableString(Utils::exec("date '+%a %d %b %-I:%M%p'")));
-        }
-        
-        // Update battery every 30 seconds
-        if(ctx.IsFired(batteryTimer.GetHandle())) {
-            std::string bat = Utils::exec("cat /sys/class/power_supply/BAT0/capacity 2>/dev/null || echo 100");
-            battery.set(std::stoi(bat));
-        }
-        
-        // Update volume every 5 seconds
-        if(ctx.IsFired(volumeTimer.GetHandle())) {
-            std::string vol = Utils::exec("pamixer --get-volume 2>/dev/null || echo 50");
-            volume.set(std::stoi(vol));
-        }
-    }
-    State<SableString> clockText{ this, SableString("") };
-    State<int> activeWorkspace{ this, 1 };
-    State<int> volume{ this, 50 };
-    State<int> battery{ this, 100 };
+private:
+    State<int> count{ this, 0 };
+    State<SableString> time{ this, SableString("") };  // Use SableString instead of std::string
+    State<bool> update{ this, true };
+    State<int> frames{ this, 0 };
+    // get what window the bar is on
     
-    Interval clockTimer{ this };
-    Interval batteryTimer{ this };
-    Interval volumeTimer{ this };
-    
-    WaybarClone() : BaseComponent() {
-        // Start timers
-        clockTimer.Start(1000);      // 1 second
-        batteryTimer.Start(30000);   // 30 seconds
-        volumeTimer.Start(5000);     // 5 seconds
-        
-        // Initial update
-        clockText.set(SableString(Utils::exec("date '+%a %d %b %-I:%M%p'")));
-    }
 };
 
 int main() {
-    RegisterComponent<WaybarClone>("WaybarClone");
+    RegisterComponent<Bar>("Bar");
 
     // Get active monitor dimensions
     std::string output = Utils::exec(
@@ -111,12 +59,12 @@ int main() {
     }
 
     Window* window = InitialisePrimaryWindow("SableUI", width, 30);
-    Panel("WaybarClone");
+
+    Panel("Bar");
     
-    while (WaitEvents()) {
+    while (SableUI::WaitEventsTimeout(1/10)) {
         Render();
     }
 
     Shutdown();
-    return 0;
 }
